@@ -1,5 +1,8 @@
-public static class LocalizationProviderMain
+namespace KalkuzSystems.Localization
 {
-    public LocalizationProvider LocalizationProvider;
+    public static class LocalizationProviderMain
+    {
+        public LocalizationProvider LocalizationProvider;
 
+    }
 }
