@@ -11,32 +11,32 @@ namespace KalkuzSystems.Localization
 {
     public class LocalizationProvider : MonoBehaviour
     {
-        private static string LOCALIZATION_FOLDER_PATH => Path.Combine(Application.streamingAssetsPath, "Localization");
-        private static string PLAYER_PREFS_LAST_LOCALE_KEY => "localization-preference";
+        private string LOCALIZATION_FOLDER_PATH => Path.Combine(Application.streamingAssetsPath, "Localization");
+        private string PLAYER_PREFS_LAST_LOCALE_KEY => "localization-preference";
 
-        private static LocalizationProvider m_instance;
-        
+        private LocalizationProvider m_instance;
+
         private Dictionary<string, string> strings;
-        
-        private static Action m_onLocaleChanged;
-        public static Action OnLocaleChanged
+
+        private Action m_onLocaleChanged;
+        public Action OnLocaleChanged
         {
             get => m_onLocaleChanged;
             set => m_onLocaleChanged = value;
         }
 
         [SerializeField] private string defaultLocale = "en";
- 
+
         private void Awake()
         {
             EnsureDirectoryExistence();
             EnsureInstanceExistence();
         }
-        
+
         private IEnumerator Start()
         {
             yield return null;
-            
+
             if (PlayerPrefs.HasKey(PLAYER_PREFS_LAST_LOCALE_KEY))
             {
                 ChangeLocale(PlayerPrefs.GetString(PLAYER_PREFS_LAST_LOCALE_KEY, defaultLocale));
@@ -46,7 +46,7 @@ namespace KalkuzSystems.Localization
                 ChangeLocale(defaultLocale);
             }
         }
-        
+
         private void EnsureInstanceExistence()
         {
             if (m_instance)
@@ -56,12 +56,12 @@ namespace KalkuzSystems.Localization
             }
             else m_instance = this;
         }
-        private static void EnsureDirectoryExistence()
+        private void EnsureDirectoryExistence()
         {
             if (Application.platform != RuntimePlatform.WebGLPlayer)
             {
                 if (Directory.Exists(LOCALIZATION_FOLDER_PATH)) return;
-            
+
                 Debug.Log("StreamingAssets/Localization directory did not exist. Creating...");
                 Directory.CreateDirectory(LOCALIZATION_FOLDER_PATH);
             }
@@ -70,10 +70,10 @@ namespace KalkuzSystems.Localization
             UnityEditor.AssetDatabase.Refresh();
 #endif
         }
-        
-        private static string GetJsonPath(string localeID) => Path.Combine(LOCALIZATION_FOLDER_PATH, $"{localeID}.json");
 
-        public static void ChangeLocale(string localeID)
+        private string GetJsonPath(string localeID) => Path.Combine(LOCALIZATION_FOLDER_PATH, $"{localeID}.json");
+
+        public void ChangeLocale(string localeID)
         {
             if (Application.platform == RuntimePlatform.WebGLPlayer)
             {
@@ -89,13 +89,13 @@ namespace KalkuzSystems.Localization
         private IEnumerator LoadLocalizationAssetWebRequest(string localeID)
         {
             var jsonPath = GetJsonPath(localeID);
-            
+
             var json = "";
             var uwr = UnityWebRequest.Get(jsonPath);
             yield return uwr.SendWebRequest();
-            
+
             json = uwr.downloadHandler.text;
-            
+
             strings = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
             m_onLocaleChanged?.Invoke();
         }
@@ -110,19 +110,19 @@ namespace KalkuzSystems.Localization
                 Debug.Log($"StreamingAssets/Localization/{localeID}.json is not found.");
                 return;
             }
-            
+
             using (StreamReader reader = new StreamReader(jsonPath))
             {
                 json = reader.ReadToEnd();
             }
-            
+
             strings = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
             m_onLocaleChanged?.Invoke();
         }
-        public static string TryReadLocalizedString(string key)
+        public string TryReadLocalizedString(string key)
         {
             if (m_instance == null) return "";
-            
+
             if (m_instance.strings.TryGetValue(key, out string value))
             {
                 return value;
@@ -133,7 +133,7 @@ namespace KalkuzSystems.Localization
                 return "";
             }
         }
-        public static List<string> GetLocales()
+        public List<string> GetLocales()
         {
             var dirs = Directory.GetFiles(LOCALIZATION_FOLDER_PATH);
             var files = dirs.Select((dir) => dir.Split(Path.DirectorySeparatorChar).Last());
@@ -145,7 +145,7 @@ namespace KalkuzSystems.Localization
 
 #if UNITY_EDITOR
         [UnityEditor.MenuItem("Kalkuz Systems/Json Localization/Initialize Localization Assets")]
-        static void InitializeLocalizationSystem()
+     void InitializeLocalizationSystem()
         {
             EnsureDirectoryExistence();
             
