@@ -14,7 +14,6 @@ namespace KalkuzSystems.Localization
         private string LOCALIZATION_FOLDER_PATH => Path.Combine(Application.streamingAssetsPath, "Localization");
         private string PLAYER_PREFS_LAST_LOCALE_KEY => "localization-preference";
 
-        private LocalizationProvider m_instance;
 
         private Dictionary<string, string> strings;
 
@@ -49,12 +48,12 @@ namespace KalkuzSystems.Localization
 
         private void EnsureInstanceExistence()
         {
-            if (m_instance)
+            if (LocalizationProviderMain.LocalizationProvider)
             {
-                Debug.LogWarning($"There is already a {nameof(LocalizationProvider)} declared in scene. Destroying the duplicate one.", m_instance);
+                Debug.LogWarning($"There is already a {nameof(LocalizationProvider)} declared in scene. Destroying the duplicate one.", LocalizationProviderMain.LocalizationProvider);
                 Destroy(gameObject);
             }
-            else m_instance = this;
+            else LocalizationProviderMain.LocalizationProvider = this;
         }
         private void EnsureDirectoryExistence()
         {
@@ -77,11 +76,11 @@ namespace KalkuzSystems.Localization
         {
             if (Application.platform == RuntimePlatform.WebGLPlayer)
             {
-                m_instance.StartCoroutine(m_instance.LoadLocalizationAssetWebRequest(localeID));
+                LocalizationProviderMain.LocalizationProvider.StartCoroutine(LocalizationProviderMain.LocalizationProvider.LoadLocalizationAssetWebRequest(localeID));
             }
             else
             {
-                m_instance.LoadLocalizationAsset(localeID);
+                LocalizationProviderMain.LocalizationProvider.LoadLocalizationAsset(localeID);
             }
             PlayerPrefs.SetString(PLAYER_PREFS_LAST_LOCALE_KEY, localeID);
         }
@@ -121,9 +120,9 @@ namespace KalkuzSystems.Localization
         }
         public string TryReadLocalizedString(string key)
         {
-            if (m_instance == null) return "";
+            if (LocalizationProviderMain.LocalizationProvider == null) return "";
 
-            if (m_instance.strings.TryGetValue(key, out string value))
+            if (LocalizationProviderMain.LocalizationProvider.strings.TryGetValue(key, out string value))
             {
                 return value;
             }
@@ -145,7 +144,7 @@ namespace KalkuzSystems.Localization
 
 #if UNITY_EDITOR
         [UnityEditor.MenuItem("Kalkuz Systems/Json Localization/Initialize Localization Assets")]
-     void InitializeLocalizationSystem()
+         void InitializeLocalizationSystem()
         {
             EnsureDirectoryExistence();
             
